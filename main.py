@@ -6,7 +6,8 @@ from transformers import TrainingArguments, Trainer
 from datasets import load_dataset
 import torch
 from torch.utils.data import DataLoader, TensorDataset
-import datautils  # Ensure utils.py has required functions
+import utils
+#import datautils  # Ensure utils.py has required functions
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--task', choices=['run_ft', 'run_icl', 'plot', 'cache'])
@@ -35,8 +36,8 @@ def fine_tune(model_name, dataset_path):
     # This would typically involve tokenizing the text, converting labels to integers, etc.
     
     # TODO: Load model and tokenizer
-    model = datautils.load_model(model_name)
-    tokenizer = datautils.load_tokenizer(model_name)
+    model = utils.load_model(model_name)
+    tokenizer = utils.load_tokenizer(model_name)
     
     # TODO: Define a TrainingArguments object
     training_args = TrainingArguments(
@@ -60,8 +61,8 @@ def fine_tune(model_name, dataset_path):
 
 def run_in_context_learning(model_name, prompt):
     # TODO: Load the fine-tuned model
-    model = datautils.load_model(model_name)
-    tokenizer = datautils.load_tokenizer(model_name)
+    model = utils.load_model(model_name)
+    tokenizer = utils.load_tokenizer(model_name)
 
     # TODO: Tokenize the prompt and generate a response
     inputs = tokenizer(prompt, return_tensors="pt")
@@ -75,9 +76,9 @@ def main():
     elif args.task == 'run_icl':
         run_in_context_learning(args.model, args.prompt)
     elif args.task == 'plot':
-        datautils.plot_results(args.output)  # Assuming you have a function for plotting
+        utils.plot_results(args.output)  # Assuming you have a function for plotting
     elif args.task == 'cache':
-        datautils.cache_models_and_datasets()  # Assuming you have a function for caching
+        utils.cache_models_and_datasets()  # Assuming you have a function for caching
 
 if __name__ == '__main__':
     main()
