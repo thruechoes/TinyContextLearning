@@ -1,9 +1,26 @@
-from transformers import AutoModelForSequenceClassification, AutoTokenizer, Trainer, TrainingArguments
+#from transformers import AutoModelForSequenceClassification, AutoTokenizer, Trainer, TrainingArguments
+import transformers as tf
 import torch
 import os
 import json
-from datasets import load_dataset
+#from datasets import load_dataset
+import datasets
 import matplotlib.pyplot as plt
+from typing import List, Tuple, Dict
+
+def get_hf_model_name(model: str) -> str:
+    """
+    Matches model name to the Hugging Face model name.
+    """
+    """return {
+        'bert-tiny': 'prajjwal1/bert-tiny',
+        'bert-med' : 'prajjwal1/bert-medium'
+    }[model]"""
+    # Returns input model name if not found 
+    return {
+        'bert-tiny' : 'prajjwal1/bert-tiny',
+        #'bert-med'  : 'prajjwal1/bert-medium'
+    }.get(model, model)
 
 def load_model(model_name):
     """
@@ -15,8 +32,7 @@ def load_model(model_name):
     Returns:
     model: The loaded transformer model.
     """
-    model = AutoModelForSequenceClassification.from_pretrained(model_name)
-    return model
+    return tf.AutoModelForSequenceClassification.from_pretrained(model_name)
 
 def load_tokenizer(model_name):
     """
@@ -28,36 +44,19 @@ def load_tokenizer(model_name):
     Returns:
     tokenizer: The tokenizer for the transformer model.
     """
-    tokenizer = AutoTokenizer.from_pretrained(model_name)
-    return tokenizer
+    return tf.AutoTokenizer.from_pretrained(model_name)
 
-def cache_models_and_datasets():
-    """
-    Download and cache models and datasets.
-    """
-    # List of models to cache
-    models = [
-        'bert-tiny',
-        'bert-medium',  # This should be the correct model name or path
-    ]
-    
-    # Download and cache models
-    for model in models:
-        print(f"Caching model: {model}")
-        _ = AutoModelForSequenceClassification.from_pretrained(model)
-        _ = AutoTokenizer.from_pretrained(model)
-    
-    # List of datasets to cache (if any)
-    datasets = [
-        # Add dataset paths or identifiers here
-    ]
-    
-    # Download and cache datasets
-    for dataset in datasets:
-        print(f"Caching dataset: {dataset}")
-        _ = load_dataset(dataset)
-    
-    print("Caching complete.")
+def load_qa_dataset(file_path: str, n_train: int, n_val: int) -> Tuple[Dict[str, List[str]], Dict[str, List[str]]]:
+    with open(file_path, 'r') as f:
+        data = json.load(f)
+
+    questions = [pair['question'] for pair in data]
+    answers = [pair['answer'] for pair in data]
+
+    train_data = {'questions': questions[:n_train], 'answers': answers[:n_train]}
+    val_data = {'questions': questions[n_train:n_train+n_val], 'answers': answers[n_train:n_train+n_val]}
+
+    return train_data, val_data
 
 def process_data(file_path):
     """
@@ -79,6 +78,38 @@ def process_data(file_path):
     # TODO: Add processing steps here (e.g., tokenization, converting labels to integers)
     
     return processed_data  # This should be your processed data
+
+def cache_models_and_datasets():
+    """
+    Download and cache models and datasets.
+    """
+    # List of models to cache
+    models = [
+        'bert-tiny',
+        #'bert-medium',
+    ]
+    
+    # Download and cache models
+    for model in models:
+        hf_model_name = get_hf_model_name(model)
+        print(f"Caching model: { hf_model_name }")
+        _ = load_model(hf_model_name)
+        _ = load_tokenizer(hf_model_name)
+    
+    # List of datasets to cache (if any)
+    datasets = [
+        {"filepath"    : "../fitness.json",
+         "n_train"     : 20,
+         "n_val"       : 10
+        }
+    ]
+    
+    # Download and cache datasets
+    for dataset in datasets:
+        print(f"Caching dataset: {dataset}")
+        _ = load_qa_dataset(file_path = dataset['filepath'], n_train = dataset['n_train'], n_val = dataset['n_val'])
+    
+    print("Caching complete.")
 
 def plot_results(output_path):
     """
@@ -124,7 +155,7 @@ def train_model(model, tokenizer, data, output_dir):
     # TODO: Preprocess the data if necessary
     
     # Define training arguments
-    training_args = TrainingArguments(
+    training_args = tf.TrainingArguments(
         output_dir=output_dir,
         num_train_epochs=3,
         per_device_train_batch_size=4,
@@ -133,7 +164,7 @@ def train_model(model, tokenizer, data, output_dir):
     )
 
     # Define Trainer
-    trainer = Trainer(
+    trainer = tf.Trainer(
         model=model,
         args=training_args,
         train_dataset=data,

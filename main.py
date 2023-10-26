@@ -54,7 +54,7 @@ def fine_tune(model_name, dataset_path):
     trainer = Trainer(
         model=model,
         args=training_args,
-        train_dataset=processed_data,  # This should be your processed data
+        train_dataset = processed_data,  # This should be your processed data
         # You might also want to pass an evaluation dataset
     )
     trainer.train()
