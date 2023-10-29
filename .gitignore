@@ -1,3 +1,7 @@
+# Pre-trained and fine-tuned model and dataset stored in cache/
+cache/
+GET_API.py
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

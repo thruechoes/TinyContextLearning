@@ -2,6 +2,26 @@
 
 Using Local and Global Entropy to order few-shot prompts. 
 
+## QuickStart 
+
+The following steps can be implemented with this codebase: 
+
+### Cache Model and Local Dataset 
+
+```
+python main.py --task cache --model bert-tiny --dataset path/to/local_data.json
+```
+
+### Fine-tune model with LoRA 
+
+The *--loramode* parameter takes the form **loraN** where N can take the values **[2, 4, 8, 16]**.
+
+E.g. 
+
+```
+python main.py --task run_ft --model bert-tiny --dataset path/to/local_data.json --loramode lora4
+```
+
 ## Query Splitting 
 
 Split prompt into types of knowledge, run subtypes through LLM, and combine results into one. 
